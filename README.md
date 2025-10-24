@@ -1,36 +1,223 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# 🔗 MERN URL Shortener
 
-First, run the development server:
+A production-ready **URL Shortener** built with the **MERN Stack (MongoDB, Express, React, Node.js)** using **TypeScript**, **Drizzle ORM**, and **Next.js**.
+It provides a seamless way to shorten long URLs, track analytics, and manage links — all through a modern, responsive UI.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🌐 Live Demo
+
+🚀 **Deployed App:** [https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/](https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/)
+
+---
+
+## 🖼️ Preview
+
+*(Add screenshots or demo GIFs here)*
+Example:
+
+```markdown
+![App Screenshot](https://your-screenshot-link.png)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ✨ Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+✅ **Shorten URLs instantly** – Generate short, clean, shareable links
+📊 **Track analytics** – Count and monitor URL visits
+🧩 **Type-safe backend** – Built entirely with TypeScript
+⚙️ **Drizzle ORM** – Lightweight, modern database layer
+🌍 **Responsive UI** – Optimized for desktop and mobile
+🚀 **Fast build & runtime** – Powered by Bun + Next.js
+☁️ **Deployed on Orchids** – Cloud-ready and production optimized
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Layer          | Technologies                            |
+| -------------- | --------------------------------------- |
+| **Frontend**   | Next.js, React, TypeScript, TailwindCSS |
+| **Backend**    | Node.js, Express.js, Drizzle ORM        |
+| **Database**   | MongoDB                                 |
+| **Build Tool** | Bun                                     |
+| **Deployment** | Orchids Platform                        |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📂 Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+📦 URL_shortner
+├── drizzle/              # Database ORM setup (Drizzle)
+├── public/               # Static assets
+├── src/                  # Source code
+│   ├── components/       # React UI components
+│   ├── pages/            # Next.js pages
+│   ├── lib/              # Utility and helper functions
+│   └── server/           # Express backend logic
+├── middleware.ts         # Next.js middleware for redirects
+├── drizzle.config.ts     # Drizzle ORM configuration
+├── next.config.ts        # Next.js configuration
+├── .env                  # Environment variables
+├── README.md
+└── bun.lock / package.json
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## ⚙️ Installation & Setup
+
+### 1️⃣ Clone the repository
+
+```bash
+git clone https://github.com/RAJVEER42/URL_shortner.git
+cd URL_shortner
+```
+
+### 2️⃣ Install dependencies
+
+```bash
+bun install   # or npm install
+```
+
+### 3️⃣ Environment configuration
+
+Create a `.env` file in the root directory:
+
+```bash
+MONGO_URI=your_mongodb_connection_string
+BASE_URL=http://localhost:3000
+```
+
+### 4️⃣ Run the development server
+
+```bash
+bun run dev   # or npm run dev
+```
+
+The app should now be running at [http://localhost:3000](http://localhost:3000).
+
+---
+
+## 🧠 How It Works
+
+1. The user enters a **long URL** in the frontend form.
+2. The frontend sends a request to the **Express backend API**.
+3. The backend:
+
+   * Validates the URL.
+   * Generates a unique short code.
+   * Saves the mapping to **MongoDB** via **Drizzle ORM**.
+4. When a user visits the short link, they are **redirected** to the original URL.
+5. Analytics are optionally logged for each visit.
+
+---
+
+## 🧩 API Endpoints
+
+| Method | Endpoint        | Description                  |
+| ------ | --------------- | ---------------------------- |
+| `POST` | `/api/shorten`  | Create a new shortened URL   |
+| `GET`  | `/api/:shortId` | Redirect to the original URL |
+| `GET`  | `/api/urls`     | Fetch all shortened URLs     |
+
+Example:
+
+```bash
+POST /api/shorten
+Content-Type: application/json
+{
+  "url": "https://example.com"
+}
+```
+
+Response:
+
+```json
+{
+  "shortUrl": "https://short.ly/abc123"
+}
+```
+
+---
+
+## 🧰 Scripts
+
+| Command         | Description                |
+| --------------- | -------------------------- |
+| `bun run dev`   | Run the development server |
+| `bun run build` | Build for production       |
+| `bun run start` | Start production server    |
+| `bun run lint`  | Lint the codebase          |
+
+---
+
+## 🧑‍💻 Development Notes
+
+* Built using **TypeScript** for end-to-end type safety
+* **Drizzle ORM** used for schema management and migrations
+* Uses **Next.js Middleware** for dynamic redirects
+* Frontend styling powered by **TailwindCSS**
+* Environment variables managed via `.env`
+
+---
+
+## 🚀 Deployment
+
+This project is deployed on **Orchids Cloud** using Bun for fast builds and startup times.
+
+**Live Deployment:**
+👉 [https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/](https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/)
+
+To deploy your own instance:
+
+```bash
+bun run build
+bun run start
+```
+
+---
+
+## 📈 Future Enhancements
+
+* [ ] Add user authentication (login to manage links)
+* [ ] Add analytics dashboard with charts
+* [ ] Support custom short URLs
+* [ ] QR code generation
+* [ ] API key–based usage limits
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repo
+2. Create a new branch (`feature/awesome-feature`)
+3. Commit your changes
+4. Push to your branch and open a PR
+
+---
+
+## 🪪 License
+
+This project is open-source under the **MIT License**.
+
+---
+
+## 🧡 Acknowledgements
+
+* [Next.js](https://nextjs.org/)
+* [Drizzle ORM](https://orm.drizzle.team/)
+* [MongoDB](https://www.mongodb.com/)
+* [TailwindCSS](https://tailwindcss.com/)
+* [Bun](https://bun.sh/)
+* [Orchids Cloud](https://orchids.page/)
+
+---
+
+~ Rajveer Bishnoi ✨
+10404
