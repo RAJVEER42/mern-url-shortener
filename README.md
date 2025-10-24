@@ -5,6 +5,16 @@ A production-ready **URL Shortener** built with the **MERN Stack (MongoDB, Expre
 It provides a seamless way to shorten long URLs, track analytics, and manage links — all through a modern, responsive UI.
 
 ---
+## PHOTO 📸
+
+<img width="2992" height="1644" alt="image" src="https://github.com/user-attachments/assets/e6959dc3-729b-4bc8-9094-6d8effae4cc4" />
+
+<img width="3018" height="1692" alt="image" src="https://github.com/user-attachments/assets/dca83604-78b1-4739-8e42-cb275fa807ca" />
+
+<img width="3022" height="1688" alt="image" src="https://github.com/user-attachments/assets/c8fa41c2-f947-403d-8e25-5d93a6e160bc" />
+
+
+---
 
 ## 🌐 Live Demo
 
