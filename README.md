@@ -225,7 +225,6 @@ This project is open-source under the **MIT License**.
 * [MongoDB](https://www.mongodb.com/)
 * [TailwindCSS](https://tailwindcss.com/)
 * [Bun](https://bun.sh/)
-* [Orchids Cloud](https://orchids.page/)
 
 ---
 
