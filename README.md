@@ -25,7 +25,7 @@ It provides a seamless way to shorten long URLs, track analytics, and manage lin
 
 ## 🌐 Live Demo
 
-🚀 **Deployed App:** [https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.page/](https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/)
+🚀 **Deployed App:** (https://mern-url-shortener-deployment.vercel.app/login)
 
 ---
 
@@ -176,7 +176,7 @@ Response:
 This project is deployed on **Orchids Cloud** using Bun for fast builds and startup times.
 
 **Live Deployment:**
-👉 [https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/](https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/)
+👉 [URL-SHORTEN](https://mern-url-shortener-deployment.vercel.app/login)
 
 To deploy your own instance:
 
