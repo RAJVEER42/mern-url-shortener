@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { urls } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 // Generate a random short code
 function generateShortCode(): string {
@@ -17,12 +18,24 @@ function generateShortCode(): string {
 // GET - Fetch all URLs for authenticated user
 export async function GET(request: NextRequest) {
   try {
-    // Get session from better-auth
-    const session = await auth.api.getSession({ headers: request.headers });
+    // Get session from better-auth with proper headers
+    const headersList = await headers();
+    const session = await auth.api.getSession({ headers: headersList });
+
+    console.log('GET /api/urls - Session:', session?.user?.id ? 'Valid' : 'Invalid');
 
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      );
+    }
+
+    // Validate userId is a string
+    if (typeof session.user.id !== 'string' || !session.user.id) {
+      console.error('GET /api/urls - Invalid userId type:', typeof session.user.id, session.user.id);
+      return NextResponse.json(
+        { error: 'Invalid user session', code: 'INVALID_SESSION' },
         { status: 401 }
       );
     }
@@ -45,12 +58,24 @@ export async function GET(request: NextRequest) {
 // POST - Create a new short URL
 export async function POST(request: NextRequest) {
   try {
-    // Get session from better-auth
-    const session = await auth.api.getSession({ headers: request.headers });
+    // Get session from better-auth with proper headers
+    const headersList = await headers();
+    const session = await auth.api.getSession({ headers: headersList });
+
+    console.log('POST /api/urls - Session:', session?.user?.id ? 'Valid' : 'Invalid');
 
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      );
+    }
+
+    // Validate userId is a string
+    if (typeof session.user.id !== 'string' || !session.user.id) {
+      console.error('POST /api/urls - Invalid userId type:', typeof session.user.id, session.user.id);
+      return NextResponse.json(
+        { error: 'Invalid user session', code: 'INVALID_SESSION' },
         { status: 401 }
       );
     }
@@ -86,6 +111,9 @@ export async function POST(request: NextRequest) {
     }
 
     const now = new Date().toISOString();
+    
+    console.log('POST /api/urls - Inserting with userId:', session.user.id, 'Type:', typeof session.user.id);
+    
     const newUrl = await db
       .insert(urls)
       .values({
@@ -111,12 +139,24 @@ export async function POST(request: NextRequest) {
 // DELETE - Delete a URL by ID
 export async function DELETE(request: NextRequest) {
   try {
-    // Get session from better-auth
-    const session = await auth.api.getSession({ headers: request.headers });
+    // Get session from better-auth with proper headers
+    const headersList = await headers();
+    const session = await auth.api.getSession({ headers: headersList });
+
+    console.log('DELETE /api/urls - Session:', session?.user?.id ? 'Valid' : 'Invalid');
 
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      );
+    }
+
+    // Validate userId is a string
+    if (typeof session.user.id !== 'string' || !session.user.id) {
+      console.error('DELETE /api/urls - Invalid userId type:', typeof session.user.id, session.user.id);
+      return NextResponse.json(
+        { error: 'Invalid user session', code: 'INVALID_SESSION' },
         { status: 401 }
       );
     }
