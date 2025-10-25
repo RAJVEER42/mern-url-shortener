@@ -13,9 +13,13 @@ It provides a seamless way to shorten long URLs, track analytics, and manage lin
 
 <img width="3022" height="1688" alt="image" src="https://github.com/user-attachments/assets/c8fa41c2-f947-403d-8e25-5d93a6e160bc" />
 
+<img width="3010" height="1702" alt="image" src="https://github.com/user-attachments/assets/e67ed07d-db33-4938-8057-3057ea3137d3" />
+
 <img width="3024" height="1188" alt="image" src="https://github.com/user-attachments/assets/59e89284-b558-47eb-8749-f75344f5765f" />
 
 <img width="2066" height="280" alt="image" src="https://github.com/user-attachments/assets/e2e7ad14-4345-423a-bc78-eaec4b880b89" />
+
+<img width="3006" height="584" alt="image" src="https://github.com/user-attachments/assets/2154afe8-599b-47fe-812c-5e1cc5affb2a" />
 
 
 
@@ -23,7 +27,7 @@ It provides a seamless way to shorten long URLs, track analytics, and manage lin
 
 ## 🌐 Live Demo
 
-🚀 **Deployed App:** [https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.page/](https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/)
+🚀 **Deployed App:** [URL-SHORTENER](mern-url-shortener-deployment.vercel.app)
 
 ---
 
@@ -47,7 +51,7 @@ It provides a seamless way to shorten long URLs, track analytics, and manage lin
 | **Backend**    | Node.js, Express.js, Drizzle ORM        |
 | **Database**   | MongoDB                                 |
 | **Build Tool** | Bun                                     |
-| **Deployment** | Orchids Platform                        |
+| **Deployment** | Vercel Platform                         |
 
 ---
 
@@ -174,7 +178,7 @@ Response:
 This project is deployed on **Orchids Cloud** using Bun for fast builds and startup times.
 
 **Live Deployment:**
-👉 [https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/](https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/)
+👉 [URL-SHORTENER](mern-url-shortener-deployment.vercel.app)
 
 To deploy your own instance:
 
