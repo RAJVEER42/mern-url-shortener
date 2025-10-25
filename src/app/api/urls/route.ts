@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { urls } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { auth } from '@/lib/auth';
 
 // Generate a random short code
 function generateShortCode(): string {
@@ -16,11 +17,10 @@ function generateShortCode(): string {
 // GET - Fetch all URLs for authenticated user
 export async function GET(request: NextRequest) {
   try {
-    // For testing: get userId from query param, in production this comes from session
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    // Get session from better-auth
+    const session = await auth.api.getSession({ headers: request.headers });
 
-    if (!userId) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required', code: 'UNAUTHORIZED' },
         { status: 401 }
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const userUrls = await db
       .select()
       .from(urls)
-      .where(eq(urls.userId, userId));
+      .where(eq(urls.userId, session.user.id));
 
     return NextResponse.json({ urls: userUrls });
   } catch (error) {
@@ -45,16 +45,18 @@ export async function GET(request: NextRequest) {
 // POST - Create a new short URL
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { originalUrl, userId } = body;
+    // Get session from better-auth
+    const session = await auth.api.getSession({ headers: request.headers });
 
-    // Validate authentication
-    if (!userId) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required', code: 'UNAUTHORIZED' },
         { status: 401 }
       );
     }
+
+    const body = await request.json();
+    const { originalUrl } = body;
 
     // Validate required fields
     if (!originalUrl) {
@@ -87,7 +89,7 @@ export async function POST(request: NextRequest) {
     const newUrl = await db
       .insert(urls)
       .values({
-        userId: userId,
+        userId: session.user.id,
         originalUrl: originalUrl.trim(),
         shortCode,
         clicks: 0,
@@ -109,9 +111,18 @@ export async function POST(request: NextRequest) {
 // DELETE - Delete a URL by ID
 export async function DELETE(request: NextRequest) {
   try {
+    // Get session from better-auth
+    const session = await auth.api.getSession({ headers: request.headers });
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Authentication required', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const userId = searchParams.get('userId');
 
     if (!id || isNaN(parseInt(id))) {
       return NextResponse.json(
@@ -120,19 +131,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Validate authentication
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Authentication required', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
-    }
-
     // Check ownership before deleting
     const urlRecord = await db
       .select()
       .from(urls)
-      .where(and(eq(urls.id, parseInt(id)), eq(urls.userId, userId)))
+      .where(and(eq(urls.id, parseInt(id)), eq(urls.userId, session.user.id)))
       .limit(1);
 
     if (urlRecord.length === 0) {

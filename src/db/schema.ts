@@ -1,13 +1,5 @@
 import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
 
-export const users = sqliteTable('users', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  email: text('email').notNull().unique(),
-  name: text('name'),
-  createdAt: text('created_at').notNull(),
-  updatedAt: text('updated_at').notNull(),
-});
-
 export const urls = sqliteTable('urls', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: text('user_id').notNull().references(() => user.id),
@@ -17,7 +9,6 @@ export const urls = sqliteTable('urls', {
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
-
 
 // Auth tables for better-auth
 export const user = sqliteTable("user", {

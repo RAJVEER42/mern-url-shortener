@@ -23,6 +23,20 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    // Password validation
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -34,7 +48,16 @@ export default function LoginPage() {
       });
 
       if (error?.code) {
-        toast.error("Invalid email or password. Please make sure you have already registered an account and try again.");
+        // Provide specific error messages
+        if (error.code === "INVALID_EMAIL") {
+          toast.error("Invalid email address");
+        } else if (error.code === "INVALID_PASSWORD") {
+          toast.error("Invalid password. Please check your password and try again.");
+        } else if (error.code === "USER_NOT_FOUND") {
+          toast.error("No account found with this email. Please register first.");
+        } else {
+          toast.error("Invalid email or password. Please make sure you have already registered an account and try again.");
+        }
         return;
       }
 

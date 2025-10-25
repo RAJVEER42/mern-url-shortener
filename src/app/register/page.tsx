@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { UserPlus, Sparkles } from "lucide-react";
+import { UserPlus, Sparkles, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 
 type ErrorTypes = Partial<Record<string, string>>;
@@ -23,6 +23,20 @@ const getErrorMessage = (code: string) => {
   return "Registration failed. Please try again.";
 };
 
+// Strong password validation
+const validatePassword = (password: string) => {
+  const checks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+  };
+  
+  const isStrong = Object.values(checks).filter(Boolean).length >= 4;
+  return { checks, isStrong };
+};
+
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -32,17 +46,28 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
+  const [showPasswordChecks, setShowPasswordChecks] = useState(false);
+
+  const passwordValidation = validatePassword(formData.password);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Please enter a valid email address");
       return;
     }
 
-    if (formData.password.length < 8) {
-      toast.error("Password must be at least 8 characters long");
+    // Strong password validation
+    if (!passwordValidation.isStrong) {
+      toast.error("Password must meet at least 4 of the security requirements");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -143,12 +168,71 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onFocus={() => setShowPasswordChecks(true)}
                   className="backdrop-blur-xl bg-white/50 dark:bg-black/50 border-white/30 focus:border-black focus:ring-black"
                   required
                   disabled={loading}
                   autoComplete="off"
                 />
-                <p className="text-xs text-muted-foreground">Must be at least 8 characters</p>
+                
+                {/* Password strength indicators */}
+                {showPasswordChecks && formData.password && (
+                  <div className="space-y-2 p-3 rounded-lg bg-white/60 dark:bg-black/60 backdrop-blur-xl border border-white/30">
+                    <p className="text-xs font-medium text-muted-foreground">Password must meet at least 4 requirements:</p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordValidation.checks.length ? (
+                          <CheckCircle2 className="h-3 w-3 text-green-600" />
+                        ) : (
+                          <XCircle className="h-3 w-3 text-gray-400" />
+                        )}
+                        <span className={passwordValidation.checks.length ? "text-green-600" : "text-muted-foreground"}>
+                          At least 8 characters
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordValidation.checks.uppercase ? (
+                          <CheckCircle2 className="h-3 w-3 text-green-600" />
+                        ) : (
+                          <XCircle className="h-3 w-3 text-gray-400" />
+                        )}
+                        <span className={passwordValidation.checks.uppercase ? "text-green-600" : "text-muted-foreground"}>
+                          One uppercase letter
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordValidation.checks.lowercase ? (
+                          <CheckCircle2 className="h-3 w-3 text-green-600" />
+                        ) : (
+                          <XCircle className="h-3 w-3 text-gray-400" />
+                        )}
+                        <span className={passwordValidation.checks.lowercase ? "text-green-600" : "text-muted-foreground"}>
+                          One lowercase letter
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordValidation.checks.number ? (
+                          <CheckCircle2 className="h-3 w-3 text-green-600" />
+                        ) : (
+                          <XCircle className="h-3 w-3 text-gray-400" />
+                        )}
+                        <span className={passwordValidation.checks.number ? "text-green-600" : "text-muted-foreground"}>
+                          One number
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordValidation.checks.special ? (
+                          <CheckCircle2 className="h-3 w-3 text-green-600" />
+                        ) : (
+                          <XCircle className="h-3 w-3 text-gray-400" />
+                        )}
+                        <span className={passwordValidation.checks.special ? "text-green-600" : "text-muted-foreground"}>
+                          One special character (!@#$%^&*...)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Trash2, ExternalLink, Link as LinkIcon, ArrowUpDown, Sparkles, LogOut, LogIn, UserPlus } from "lucide-react";
+import { Copy, Trash2, ExternalLink, Link as LinkIcon, ArrowUpDown, Sparkles, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { authClient, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -49,7 +49,7 @@ export default function URLShortener() {
     
     try {
       const token = localStorage.getItem("bearer_token");
-      const response = await fetch(`/api/urls?userId=${session.user.id}`, {
+      const response = await fetch(`/api/urls`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         }
@@ -94,8 +94,7 @@ export default function URLShortener() {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ 
-          originalUrl: newUrl,
-          userId: session.user.id 
+          originalUrl: newUrl
         }),
       });
 
@@ -122,7 +121,7 @@ export default function URLShortener() {
     
     try {
       const token = localStorage.getItem("bearer_token");
-      const response = await fetch(`/api/urls?id=${id}&userId=${session.user.id}`, {
+      const response = await fetch(`/api/urls?id=${id}`, {
         method: "DELETE",
         headers: {
           'Authorization': `Bearer ${token}`,
