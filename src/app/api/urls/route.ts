@@ -3,7 +3,6 @@ import { db } from '@/db';
 import { urls } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
 
 // Generate a random short code
 function generateShortCode(): string {
@@ -15,14 +14,45 @@ function generateShortCode(): string {
   return code;
 }
 
+// Helper to get session from request
+async function getSessionFromRequest(request: NextRequest) {
+  try {
+    // Try to get token from Authorization header
+    const authHeader = request.headers.get('Authorization');
+    console.log('Authorization header:', authHeader ? 'Present' : 'Missing');
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      console.log('Token extracted, length:', token.length);
+      
+      // Get session using the token
+      const session = await auth.api.getSession({
+        headers: {
+          get: (name: string) => {
+            if (name.toLowerCase() === 'authorization') {
+              return authHeader;
+            }
+            return request.headers.get(name);
+          }
+        } as any
+      });
+      
+      console.log('Session retrieved:', session?.user?.id ? `Valid (${session.user.id})` : 'Invalid');
+      return session;
+    }
+    
+    console.log('No bearer token in Authorization header');
+    return null;
+  } catch (error) {
+    console.error('Error getting session:', error);
+    return null;
+  }
+}
+
 // GET - Fetch all URLs for authenticated user
 export async function GET(request: NextRequest) {
   try {
-    // Get session from better-auth with proper headers
-    const headersList = await headers();
-    const session = await auth.api.getSession({ headers: headersList });
-
-    console.log('GET /api/urls - Session:', session?.user?.id ? 'Valid' : 'Invalid');
+    const session = await getSessionFromRequest(request);
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -58,15 +88,13 @@ export async function GET(request: NextRequest) {
 // POST - Create a new short URL
 export async function POST(request: NextRequest) {
   try {
-    // Get session from better-auth with proper headers
-    const headersList = await headers();
-    const session = await auth.api.getSession({ headers: headersList });
+    const session = await getSessionFromRequest(request);
 
-    console.log('POST /api/urls - Session:', session?.user?.id ? 'Valid' : 'Invalid');
+    console.log('POST /api/urls - Session user ID:', session?.user?.id, 'Type:', typeof session?.user?.id);
 
     if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'Authentication required', code: 'UNAUTHORIZED' },
+        { error: 'Authentication required. Please sign in again.', code: 'UNAUTHORIZED' },
         { status: 401 }
       );
     }
@@ -75,7 +103,7 @@ export async function POST(request: NextRequest) {
     if (typeof session.user.id !== 'string' || !session.user.id) {
       console.error('POST /api/urls - Invalid userId type:', typeof session.user.id, session.user.id);
       return NextResponse.json(
-        { error: 'Invalid user session', code: 'INVALID_SESSION' },
+        { error: 'Invalid user session. Please sign out and sign in again.', code: 'INVALID_SESSION' },
         { status: 401 }
       );
     }
@@ -112,7 +140,7 @@ export async function POST(request: NextRequest) {
 
     const now = new Date().toISOString();
     
-    console.log('POST /api/urls - Inserting with userId:', session.user.id, 'Type:', typeof session.user.id);
+    console.log('POST /api/urls - About to insert with userId:', session.user.id, 'Type:', typeof session.user.id);
     
     const newUrl = await db
       .insert(urls)
@@ -126,6 +154,7 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
+    console.log('POST /api/urls - Successfully created URL with ID:', newUrl[0].id);
     return NextResponse.json({ url: newUrl[0] }, { status: 201 });
   } catch (error) {
     console.error('POST error:', error);
@@ -139,11 +168,7 @@ export async function POST(request: NextRequest) {
 // DELETE - Delete a URL by ID
 export async function DELETE(request: NextRequest) {
   try {
-    // Get session from better-auth with proper headers
-    const headersList = await headers();
-    const session = await auth.api.getSession({ headers: headersList });
-
-    console.log('DELETE /api/urls - Session:', session?.user?.id ? 'Valid' : 'Invalid');
+    const session = await getSessionFromRequest(request);
 
     if (!session?.user?.id) {
       return NextResponse.json(

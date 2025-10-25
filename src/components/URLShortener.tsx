@@ -43,17 +43,42 @@ export default function URLShortener() {
     }
   }, [session, isPending, router]);
 
+  // Validate token on mount
+  useEffect(() => {
+    const token = localStorage.getItem("bearer_token");
+    if (!token || token === "null" || token === "undefined") {
+      console.error("Invalid or missing bearer token, redirecting to login");
+      localStorage.removeItem("bearer_token");
+      router.push("/login");
+    }
+  }, [router]);
+
   // Fetch URLs
   const fetchUrls = async () => {
     if (!session?.user) return;
     
     try {
       const token = localStorage.getItem("bearer_token");
+      
+      if (!token || token === "null" || token === "undefined") {
+        toast.error("Session expired. Please sign in again.");
+        router.push("/login");
+        return;
+      }
+
       const response = await fetch(`/api/urls`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         }
       });
+
+      if (response.status === 401) {
+        toast.error("Session expired. Please sign in again.");
+        localStorage.removeItem("bearer_token");
+        router.push("/login");
+        return;
+      }
+
       const data = await response.json();
       setUrls(Array.isArray(data.urls) ? data.urls : []);
     } catch (error) {
@@ -84,9 +109,16 @@ export default function URLShortener() {
       return;
     }
 
+    const token = localStorage.getItem("bearer_token");
+    
+    if (!token || token === "null" || token === "undefined") {
+      toast.error("Session expired. Please sign in again.");
+      router.push("/login");
+      return;
+    }
+
     setLoading(true);
     try {
-      const token = localStorage.getItem("bearer_token");
       const response = await fetch("/api/urls", {
         method: "POST",
         headers: {
@@ -100,6 +132,13 @@ export default function URLShortener() {
 
       const data = await response.json();
 
+      if (response.status === 401) {
+        toast.error("Session expired. Please sign in again.");
+        localStorage.removeItem("bearer_token");
+        router.push("/login");
+        return;
+      }
+
       if (!response.ok) {
         toast.error(data.error || "Failed to create short URL");
         return;
@@ -109,6 +148,7 @@ export default function URLShortener() {
       setNewUrl("");
       toast.success("Short URL created successfully!");
     } catch (error) {
+      console.error("Create URL error:", error);
       toast.error("Failed to create short URL");
     } finally {
       setLoading(false);

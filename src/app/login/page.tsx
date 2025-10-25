@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,15 @@ export default function LoginPage() {
     rememberMe: false,
   });
 
+  // Clear any old/invalid tokens on mount
+  useEffect(() => {
+    const token = localStorage.getItem("bearer_token");
+    if (token && (token === "null" || token === "undefined" || token.length < 10)) {
+      console.log("Clearing invalid token on login page mount");
+      localStorage.removeItem("bearer_token");
+    }
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -40,6 +49,9 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      // Clear any existing token before login to ensure fresh token
+      localStorage.removeItem("bearer_token");
+      
       const { error } = await authClient.signIn.email({
         email: formData.email,
         password: formData.password,
@@ -61,9 +73,19 @@ export default function LoginPage() {
         return;
       }
 
+      // Verify token was set properly
+      const newToken = localStorage.getItem("bearer_token");
+      if (!newToken || newToken === "null" || newToken === "undefined") {
+        console.error("Token not set after login");
+        toast.error("Login failed. Please try again.");
+        return;
+      }
+
+      console.log("Login successful, token length:", newToken.length);
       toast.success("Login successful!");
       router.push("/");
     } catch (error) {
+      console.error("Login error:", error);
       toast.error("An error occurred during login");
     } finally {
       setLoading(false);
