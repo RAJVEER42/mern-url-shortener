@@ -20,18 +20,7 @@ It provides a seamless way to shorten long URLs, track analytics, and manage lin
 
 ## 🌐 Live Demo
 
-🚀 **Deployed App:** [https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/](https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/)
-
----
-
-## 🖼️ Preview
-
-*(Add screenshots or demo GIFs here)*
-Example:
-
-```markdown
-![App Screenshot](https://your-screenshot-link.png)
-```
+🚀 **Deployed App:** [https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.page/](https://3000-2c61595a-a212-46b1-a7e6-aad01c58e986.orchids.page/)
 
 ---
 
