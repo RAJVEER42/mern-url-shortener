@@ -47,7 +47,7 @@ It provides a seamless way to shorten long URLs, track analytics, and manage lin
 | **Backend**    | Node.js, Express.js, Drizzle ORM        |
 | **Database**   | MongoDB                                 |
 | **Build Tool** | Bun                                     |
-| **Deployment** | Orchids Platform                        |
+| **Deployment** | Vercel Platform                         |
 
 ---
 
