@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { urls } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 // Generate a random short code
 function generateShortCode(): string {
@@ -15,34 +16,15 @@ function generateShortCode(): string {
 }
 
 // Helper to get session from request
-async function getSessionFromRequest(request: NextRequest) {
+async function getSessionFromRequest() {
   try {
-    // Try to get token from Authorization header
-    const authHeader = request.headers.get('Authorization');
-    console.log('Authorization header:', authHeader ? 'Present' : 'Missing');
+    // Use better-auth's built-in session retrieval with bearer plugin
+    const session = await auth.api.getSession({ 
+      headers: await headers() 
+    });
     
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      console.log('Token extracted, length:', token.length);
-      
-      // Get session using the token
-      const session = await auth.api.getSession({
-        headers: {
-          get: (name: string) => {
-            if (name.toLowerCase() === 'authorization') {
-              return authHeader;
-            }
-            return request.headers.get(name);
-          }
-        } as any
-      });
-      
-      console.log('Session retrieved:', session?.user?.id ? `Valid (${session.user.id})` : 'Invalid');
-      return session;
-    }
-    
-    console.log('No bearer token in Authorization header');
-    return null;
+    console.log('Session retrieved:', session?.user?.id ? `Valid (${session.user.id})` : 'Invalid');
+    return session;
   } catch (error) {
     console.error('Error getting session:', error);
     return null;
@@ -52,7 +34,7 @@ async function getSessionFromRequest(request: NextRequest) {
 // GET - Fetch all URLs for authenticated user
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSessionFromRequest(request);
+    const session = await getSessionFromRequest();
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -88,7 +70,7 @@ export async function GET(request: NextRequest) {
 // POST - Create a new short URL
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSessionFromRequest(request);
+    const session = await getSessionFromRequest();
 
     console.log('POST /api/urls - Session user ID:', session?.user?.id, 'Type:', typeof session?.user?.id);
 
@@ -168,7 +150,7 @@ export async function POST(request: NextRequest) {
 // DELETE - Delete a URL by ID
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getSessionFromRequest(request);
+    const session = await getSessionFromRequest();
 
     if (!session?.user?.id) {
       return NextResponse.json(
