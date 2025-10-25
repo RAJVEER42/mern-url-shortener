@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const userUrls = await db
       .select()
       .from(urls)
-      .where(eq(urls.userId, parseInt(userId)));
+      .where(eq(urls.userId, userId));
 
     return NextResponse.json({ urls: userUrls });
   } catch (error) {
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     const newUrl = await db
       .insert(urls)
       .values({
-        userId: parseInt(userId),
+        userId: userId,
         originalUrl: originalUrl.trim(),
         shortCode,
         clicks: 0,
@@ -113,6 +113,13 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
     const userId = searchParams.get('userId');
 
+    if (!id || isNaN(parseInt(id))) {
+      return NextResponse.json(
+        { error: 'Valid URL ID is required', code: 'INVALID_ID' },
+        { status: 400 }
+      );
+    }
+
     // Validate authentication
     if (!userId) {
       return NextResponse.json(
@@ -121,18 +128,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    if (!id || isNaN(parseInt(id))) {
-      return NextResponse.json(
-        { error: 'Valid URL ID is required', code: 'INVALID_ID' },
-        { status: 400 }
-      );
-    }
-
     // Check ownership before deleting
     const urlRecord = await db
       .select()
       .from(urls)
-      .where(and(eq(urls.id, parseInt(id)), eq(urls.userId, parseInt(userId))))
+      .where(and(eq(urls.id, parseInt(id)), eq(urls.userId, userId)))
       .limit(1);
 
     if (urlRecord.length === 0) {

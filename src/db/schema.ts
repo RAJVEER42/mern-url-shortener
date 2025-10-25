@@ -10,7 +10,7 @@ export const users = sqliteTable('users', {
 
 export const urls = sqliteTable('urls', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: integer('user_id').notNull().references(() => users.id),
+  userId: text('user_id').notNull().references(() => user.id),
   originalUrl: text('original_url').notNull(),
   shortCode: text('short_code').notNull().unique(),
   clicks: integer('clicks').notNull().default(0),
