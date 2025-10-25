@@ -15,6 +15,9 @@ It provides a seamless way to shorten long URLs, track analytics, and manage lin
 
 <img width="3024" height="1188" alt="image" src="https://github.com/user-attachments/assets/59e89284-b558-47eb-8749-f75344f5765f" />
 
+<img width="2066" height="280" alt="image" src="https://github.com/user-attachments/assets/e2e7ad14-4345-423a-bc78-eaec4b880b89" />
+
+
 
 ---
 
