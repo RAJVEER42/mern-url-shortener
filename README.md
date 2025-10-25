@@ -176,7 +176,7 @@ Response:
 This project is deployed on **Orchids Cloud** using Bun for fast builds and startup times.
 
 **Live Deployment:**
-👉 [URL-SHORTEN](https://mern-url-shortener-deployment.vercel.app/login)
+👉 [URL-SHORTENER](https://mern-url-shortener-deployment.vercel.app/login)
 
 To deploy your own instance:
 
