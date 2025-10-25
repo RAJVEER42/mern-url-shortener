@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { urls } from '@/db/schema';
+import { urls, session as sessionTable, user as userTable } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
 
 // Generate a random short code
 function generateShortCode(): string {
@@ -16,15 +14,63 @@ function generateShortCode(): string {
 }
 
 // Helper to get session from request
-async function getSessionFromRequest() {
+async function getSessionFromRequest(request: NextRequest) {
   try {
-    // Use better-auth's built-in session retrieval with bearer plugin
-    const session = await auth.api.getSession({ 
-      headers: await headers() 
-    });
+    // Extract bearer token from Authorization header
+    const authHeader = request.headers.get('authorization');
     
-    console.log('Session retrieved:', session?.user?.id ? `Valid (${session.user.id})` : 'Invalid');
-    return session;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('No valid Authorization header found');
+      return null;
+    }
+
+    const token = authHeader.substring(7); // Remove "Bearer " prefix
+    
+    if (!token || token.length < 10) {
+      console.log('Invalid token length:', token?.length);
+      return null;
+    }
+    
+    console.log('Token extracted, length:', token.length);
+    
+    // Query session directly from database using the token
+    const sessionResult = await db
+      .select()
+      .from(sessionTable)
+      .where(eq(sessionTable.token, token))
+      .limit(1);
+
+    if (sessionResult.length === 0) {
+      console.log('No session found for token');
+      return null;
+    }
+
+    const session = sessionResult[0];
+
+    // Check if session is expired
+    if (session.expiresAt < new Date()) {
+      console.log('Session expired');
+      return null;
+    }
+
+    // Get user data
+    const userResult = await db
+      .select()
+      .from(userTable)
+      .where(eq(userTable.id, session.userId))
+      .limit(1);
+
+    if (userResult.length === 0) {
+      console.log('No user found for session');
+      return null;
+    }
+
+    console.log('Session retrieved successfully, userId:', session.userId);
+    
+    return {
+      user: userResult[0],
+      session: session
+    };
   } catch (error) {
     console.error('Error getting session:', error);
     return null;
@@ -34,18 +80,20 @@ async function getSessionFromRequest() {
 // GET - Fetch all URLs for authenticated user
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSessionFromRequest();
+    const sessionData = await getSessionFromRequest(request);
 
-    if (!session?.user?.id) {
+    if (!sessionData?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required', code: 'UNAUTHORIZED' },
         { status: 401 }
       );
     }
 
+    const userId = sessionData.user.id;
+
     // Validate userId is a string
-    if (typeof session.user.id !== 'string' || !session.user.id) {
-      console.error('GET /api/urls - Invalid userId type:', typeof session.user.id, session.user.id);
+    if (typeof userId !== 'string' || !userId) {
+      console.error('GET /api/urls - Invalid userId type:', typeof userId, userId);
       return NextResponse.json(
         { error: 'Invalid user session', code: 'INVALID_SESSION' },
         { status: 401 }
@@ -55,7 +103,7 @@ export async function GET(request: NextRequest) {
     const userUrls = await db
       .select()
       .from(urls)
-      .where(eq(urls.userId, session.user.id));
+      .where(eq(urls.userId, userId));
 
     return NextResponse.json({ urls: userUrls });
   } catch (error) {
@@ -70,25 +118,29 @@ export async function GET(request: NextRequest) {
 // POST - Create a new short URL
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSessionFromRequest();
+    const sessionData = await getSessionFromRequest(request);
 
-    console.log('POST /api/urls - Session user ID:', session?.user?.id, 'Type:', typeof session?.user?.id);
+    console.log('POST /api/urls - Session data:', sessionData ? 'Valid' : 'Invalid');
 
-    if (!session?.user?.id) {
+    if (!sessionData?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required. Please sign in again.', code: 'UNAUTHORIZED' },
         { status: 401 }
       );
     }
 
+    const userId = sessionData.user.id;
+
     // Validate userId is a string
-    if (typeof session.user.id !== 'string' || !session.user.id) {
-      console.error('POST /api/urls - Invalid userId type:', typeof session.user.id, session.user.id);
+    if (typeof userId !== 'string' || !userId) {
+      console.error('POST /api/urls - Invalid userId type:', typeof userId, userId);
       return NextResponse.json(
         { error: 'Invalid user session. Please sign out and sign in again.', code: 'INVALID_SESSION' },
         { status: 401 }
       );
     }
+
+    console.log('POST /api/urls - Valid userId:', userId, 'Type:', typeof userId);
 
     const body = await request.json();
     const { originalUrl } = body;
@@ -122,12 +174,12 @@ export async function POST(request: NextRequest) {
 
     const now = new Date().toISOString();
     
-    console.log('POST /api/urls - About to insert with userId:', session.user.id, 'Type:', typeof session.user.id);
+    console.log('POST /api/urls - About to insert with userId:', userId, 'Type:', typeof userId);
     
     const newUrl = await db
       .insert(urls)
       .values({
-        userId: session.user.id,
+        userId: userId,
         originalUrl: originalUrl.trim(),
         shortCode,
         clicks: 0,
@@ -150,18 +202,20 @@ export async function POST(request: NextRequest) {
 // DELETE - Delete a URL by ID
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getSessionFromRequest();
+    const sessionData = await getSessionFromRequest(request);
 
-    if (!session?.user?.id) {
+    if (!sessionData?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required', code: 'UNAUTHORIZED' },
         { status: 401 }
       );
     }
 
+    const userId = sessionData.user.id;
+
     // Validate userId is a string
-    if (typeof session.user.id !== 'string' || !session.user.id) {
-      console.error('DELETE /api/urls - Invalid userId type:', typeof session.user.id, session.user.id);
+    if (typeof userId !== 'string' || !userId) {
+      console.error('DELETE /api/urls - Invalid userId type:', typeof userId, userId);
       return NextResponse.json(
         { error: 'Invalid user session', code: 'INVALID_SESSION' },
         { status: 401 }
@@ -182,7 +236,7 @@ export async function DELETE(request: NextRequest) {
     const urlRecord = await db
       .select()
       .from(urls)
-      .where(and(eq(urls.id, parseInt(id)), eq(urls.userId, session.user.id)))
+      .where(and(eq(urls.id, parseInt(id)), eq(urls.userId, userId)))
       .limit(1);
 
     if (urlRecord.length === 0) {
