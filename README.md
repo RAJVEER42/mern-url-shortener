@@ -1,8 +1,12 @@
 
+<div align="center">
+
 # 🔗 MERN URL Shortener
 
-A production-ready **URL Shortener** built with the **MERN Stack (MongoDB, Express, React, Node.js)** using **TypeScript**, **Drizzle ORM**, and **Next.js**.
+A production-ready **URL Shortener** built with the **MERN Stack (MongoDB, Express, React, Node.js)** using **TypeScript**, **Drizzle ORM**, and **Next.js**.  
 It provides a seamless way to shorten long URLs, track analytics, and manage links — all through a modern, responsive UI.
+
+</div>
 
 ---
 ## PHOTO 📸
